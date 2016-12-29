@@ -7,11 +7,12 @@ package bpmreader;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
-import be.tarsos.dsp.io.android.AudioDispatcherFactory;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
+import javax.sound.sampled.LineUnavailableException;
 
 /**
  *
@@ -22,14 +23,14 @@ public class BPMReader {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws LineUnavailableException {
         PitchDetectionHandler handler = new PitchDetectionHandler() {
             @Override
-            public void handlePitch(PitchDetectionResult pitchDetectionResult,AudioEvent audioEvent) {
-                System.out.println(pitchDetectionResult.getPitch() + " " + audioEvent.getTimeStamp());
+            public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
+                /*throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.*/
             }
         };
-        AudioDispatcher adp = AudioDispatcherFactory.fromDefaultMicrophone(2048, 0, 0);
+        AudioDispatcher adp = AudioDispatcherFactory.fromDefaultMicrophone(44100, 2048, 0);
         adp.addAudioProcessor(new PitchProcessor(PitchEstimationAlgorithm.YIN, 44100, 2048, handler));
         adp.run();
     }
