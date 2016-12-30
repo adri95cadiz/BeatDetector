@@ -22,13 +22,24 @@ public class BPMReader {
 
     /**
      * @param args the command line arguments
+     * @throws javax.sound.sampled.LineUnavailableException
      */
     public static void main(String[] args) throws LineUnavailableException {
-        PitchDetectionHandler handler = new PitchDetectionHandler() {
+        PitchDetectionHandler handler;
+        handler = new PitchDetectionHandler() {
             @Override
             public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
-                /*throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.*/
-            }
+                if(pitchDetectionResult.getPitch() != -1){
+                    double timeStamp = audioEvent.getTimeStamp();
+                    float pitch = pitchDetectionResult.getPitch();
+                    float probability = pitchDetectionResult.getProbability();
+                    double rms = audioEvent.getRMS() * 100;
+                    String message = String.format("Frecuencia detectada: %.2fs: %.2fHz ( %.2f probabilidad, media cuadratica: %.5f )\n", timeStamp,pitch,probability,rms);
+                    System.out.println(message);
+                    //System.out.println("Audio detectado: " + pitchDetectionResult.toString() + audioEvent.toString());
+                    //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+            }              
         };
         AudioDispatcher adp = AudioDispatcherFactory.fromDefaultMicrophone(44100, 2048, 0);
         adp.addAudioProcessor(new PitchProcessor(PitchEstimationAlgorithm.YIN, 44100, 2048, handler));
