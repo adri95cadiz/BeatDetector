@@ -5,6 +5,7 @@
  */
 package bpmreader;
 
+import java.lang.Math;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
@@ -85,7 +86,60 @@ public class BPMReader {
                                     System.out.println("Bpm en disminución. Bpm adaptados = " + adaptedBpm);
                                 }
                                 System.out.println("Duracion del beat = 1/" + beat);
-                                lastBpm = bpm;                                
+                                lastBpm = bpm;     
+                                int note = (int) Math.floor(Math.log(pitch/440.0)/Math.log(2.0) * 12 + 69);
+                                System.out.println("Nota = " + note);
+                                int octava;
+                                int nota;
+                                if(note < 12) {
+                                    octava = 0;
+                                    nota = note;
+                                } else if(note < 24){                                    
+                                    octava = 1;
+                                    nota = note - 12;
+                                } else if(note < 36){
+                                    octava = 2;
+                                    nota = note - 24;
+                                } else if(note < 48){
+                                    octava = 3;
+                                    nota = note - 36;
+                                } else if(note < 60){
+                                    octava = 4;
+                                    nota = note - 48;
+                                } else if(note < 72){  
+                                    octava = 5;  
+                                    nota = note - 60;                                    
+                                } else if(note < 84){
+                                    octava = 6;
+                                    nota = note - 72;
+                                } else if(note < 96){
+                                    octava = 7;
+                                    nota = note - 80;
+                                } else if(note < 108){
+                                    octava = 8;
+                                    nota = note - 96;
+                                } else if(note < 120){
+                                    octava = 9;
+                                    nota = note - 108;
+                                } else {
+                                    octava = 10;
+                                    nota = note - 120;
+                                }
+                                switch(nota){
+                                    case 0: System.out.println("La nota tocada es C o Do"); break;
+                                    case 1: System.out.println("La nota tocada es C# o Do#"); break;
+                                    case 2: System.out.println("La nota tocada es D o Re"); break;
+                                    case 3: System.out.println("La nota tocada es D# o Re#"); break;
+                                    case 4: System.out.println("La nota tocada es E o Mi"); break;
+                                    case 5: System.out.println("La nota tocada es F o Fa"); break;
+                                    case 6: System.out.println("La nota tocada es F# o Fa#"); break;
+                                    case 7: System.out.println("La nota tocada es G o Sol"); break;
+                                    case 8: System.out.println("La nota tocada es G# o Sol#"); break;
+                                    case 9: System.out.println("La nota tocada es A o La"); break;
+                                    case 10: System.out.println("La nota tocada es A# o La#"); break;
+                                    case 11: System.out.println("La nota tocada es B o Si"); break;                                      
+                                }
+                                System.out.println("Estas tocando en la octava: " + octava);
                             }
                         }
                     }
