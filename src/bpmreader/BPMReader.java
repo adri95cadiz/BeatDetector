@@ -66,11 +66,11 @@ public class BPMReader {
                                     System.out.println("bpm crudo = " + bpm);
                                     while(bpm < 60){
                                         bpm*=2;  
-                                        beat*=2;
+                                        beat/=2;
                                     }
                                     while(bpm > 200){
                                         bpm/=2;
-                                        beat/=2;
+                                        beat*=2;
                                     }
                                 }
                                 if(adaptedBpm == 0){
@@ -84,7 +84,7 @@ public class BPMReader {
                                     adaptedBpm--;
                                     System.out.println("Bpm en disminución. Bpm adaptados = " + adaptedBpm);
                                 }
-                                System.out.println("Duracion de un beat = 1/" + beat);
+                                System.out.println("Duracion del beat = 1/" + beat);
                                 lastBpm = bpm;                                
                             }
                         }
