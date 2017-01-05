@@ -5,7 +5,6 @@
  */
 package bpmreader;
 
-import java.lang.Math;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
