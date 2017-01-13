@@ -1,5 +1,5 @@
 # BeatDetector
-Detector de Tempo y BPM basado en la libreria TargosDSP de Java
+Detector de Tempo y BPM basado en la libreria TargosDSP de Java\n
 Calcula también la nota y la octava de cada uno de los beats tocados a partir de la frecuencia
 Se utiliza la entrada de micrófono por defecto y sirve para cualquier instrumento o incluso la voz
 Estima la marca de tiempo (parte inferior, ej: 1/4, 1/2, etc.) y realiza calculos adaptativos
