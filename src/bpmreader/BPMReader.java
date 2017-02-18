@@ -12,6 +12,7 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
+import java.util.ArrayList;
 import javax.sound.sampled.LineUnavailableException;
 /*import be.tarsos.dsp.onsets.ComplexOnsetDetector;
 import be.tarsos.dsp.AudioProcessor;
@@ -23,6 +24,10 @@ import be.hogent.tarsos.dsp.util.FFT;*/
  */
 public class BPMReader {
 
+    private final static int MIN_TEMPO_BPM = 60;
+    private final static int MAX_TEMPO_BPM = 220;
+    private final static int DEFAULT_TEMPO = 112;
+    private final static int MAX_NOTES_KEY = 15;
     /**
      * @param args the command line arguments
      * @throws javax.sound.sampled.LineUnavailableException
@@ -34,11 +39,20 @@ public class BPMReader {
         final int bufferSize = 4096;
         
         PitchDetectionHandler pitchhandler = new PitchDetectionHandler() {
+            //Ultimos valores.
             private double lastProbability = 0;          
             private double lastTimeStamp = 0;         
             private double lastPitch = 0;                    
-            private double lastBpm = 120;                   
+            private double lastBpm = DEFAULT_TEMPO;              
             private double adaptedBpm = 0;
+            //Para el tempo total.
+            private double StartTime_ms = 0;
+            private double FinishTime_ms = 0;
+            private double CurrentTime_ms = 0;
+            private int NumberSamples = 0;
+            //Key Finder
+            private KeyFinder keyFinder = new KeyFinder("Unknown", "Unknown");
+            private ArrayList<String> noteArray = new ArrayList<String>();
             @Override
             public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
                 if(pitchDetectionResult.getPitch() != -1){
@@ -54,6 +68,7 @@ public class BPMReader {
                         if(rms > 0.2){
                             if(difPitch > 0.5 || difPitch < -0.5){
                                 if (difPitch > 2 || difPitch < -2 || probability > lastProbability + 0.1 || (lastProbability > 0.95 && probability > lastProbability + 0.005)) {
+                                    
                                     System.out.println("\nBeat detectado en: " + timeStamp + " con frecuencia de: " + pitch);                                
                                     System.out.println("Y media cuadratica de: " + rms);
                                     //System.out.println(probability + " " + lastProbability);
@@ -61,16 +76,27 @@ public class BPMReader {
                                     System.out.println("Tiempo desde el anterior beat: " + timeBetween);
                                     lastTimeStamp = timeStamp;
                                     lastPitch = pitch;
-                                    double bpm = 0;
+                                    CurrentTime_ms = timeStamp;
+                                    if (NumberSamples == 0) {
+                                            StartTime_ms = CurrentTime_ms;
+                                    }
+                                    NumberSamples++;
+                                    FinishTime_ms = CurrentTime_ms;                                    
+                                    double bpmFull = 0;
+                                    if (NumberSamples >= 2 && (FinishTime_ms - StartTime_ms) != 0) { 
+                                        bpmFull = (((NumberSamples -1) * 1000 * 60) / FinishTime_ms - StartTime_ms) / 1000;
+                                    }                                    
+                                    System.out.println("bpm totales: " + bpmFull);
                                     int beat = 4;
+                                    double bpm = 0;
                                     if(timeBetween != timeStamp){
                                         bpm = 60/timeBetween;
                                         System.out.println("bpm crudo = " + bpm);
-                                        while(bpm < 60){
+                                        while(bpm < MIN_TEMPO_BPM){
                                             bpm*=2;  
                                             beat/=2;
                                         }
-                                        while(bpm > 200){
+                                        while(bpm > MAX_TEMPO_BPM){
                                             bpm/=2;
                                             beat*=2;
                                         }
@@ -127,20 +153,62 @@ public class BPMReader {
                                         nota = note - 120;
                                     }
                                     switch(nota){
-                                        case 0: System.out.println("La nota tocada es C o Do"); break;
-                                        case 1: System.out.println("La nota tocada es C# o Do#"); break;
-                                        case 2: System.out.println("La nota tocada es D o Re"); break;
-                                        case 3: System.out.println("La nota tocada es D# o Re#"); break;
-                                        case 4: System.out.println("La nota tocada es E o Mi"); break;
-                                        case 5: System.out.println("La nota tocada es F o Fa"); break;
-                                        case 6: System.out.println("La nota tocada es F# o Fa#"); break;
-                                        case 7: System.out.println("La nota tocada es G o Sol"); break;
-                                        case 8: System.out.println("La nota tocada es G# o Sol#"); break;
-                                        case 9: System.out.println("La nota tocada es A o La"); break;
-                                        case 10: System.out.println("La nota tocada es A# o La#"); break;
-                                        case 11: System.out.println("La nota tocada es B o Si"); break;                                      
+                                        case 0: 
+                                            System.out.println("La nota tocada es C o Do");
+                                            noteArray.add("C"+octava);
+                                            break;
+                                        case 1:
+                                            System.out.println("La nota tocada es C# o Do# o Db o Re bemol");
+                                            noteArray.add("C#"+octava+"_or_Db"+octava);
+                                            break;
+                                        case 2:
+                                            System.out.println("La nota tocada es D o Re");
+                                            noteArray.add("D"+octava);
+                                            break;
+                                        case 3:
+                                            System.out.println("La nota tocada es D# o Re# o Eb o Mi bemol");
+                                            noteArray.add("D#"+octava+"_or_Eb"+octava);
+                                            break;
+                                        case 4: 
+                                            System.out.println("La nota tocada es E o Mi");
+                                            noteArray.add("E"+octava);
+                                            break;
+                                        case 5:
+                                            System.out.println("La nota tocada es F o Fa"); 
+                                            noteArray.add("F"+octava);
+                                            break;
+                                        case 6:
+                                            System.out.println("La nota tocada es F# o Fa# o Gb o Sol bemol");
+                                            noteArray.add("F#"+octava+"_or_Gb"+octava);
+                                            break;
+                                        case 7:
+                                            System.out.println("La nota tocada es G o Sol");
+                                            noteArray.add("G"+octava);
+                                            break;
+                                        case 8: 
+                                            System.out.println("La nota tocada es G# o Sol# o Ab o La bemol");
+                                            noteArray.add("G#"+octava+"_or_Ab"+octava);
+                                            break;
+                                        case 9:
+                                            System.out.println("La nota tocada es A o La"); 
+                                            noteArray.add("A"+octava);
+                                            break;
+                                        case 10:
+                                            System.out.println("La nota tocada es A# o La# o Bb o Si bemol");
+                                            noteArray.add("A#"+octava+"_or_Bb"+octava);
+                                            break;
+                                        case 11: 
+                                            System.out.println("La nota tocada es B o Si");
+                                            noteArray.add("B"+octava);
+                                            break;                                      
                                     }
                                     System.out.println("Estas tocando en la octava: " + octava);
+                                    if(noteArray.size() > MAX_NOTES_KEY) {                                        
+                                        noteArray.remove(0);
+                                    }
+                                    //keyFinder.SetAccidental(noteArray, KeyFinder.getAccidentalVal());
+                                    keyFinder.DetermineKey(noteArray);
+                                    System.out.println("Estas tocando en la clave: " + keyFinder.getKEYval());
                                 }
                             }
                         }
