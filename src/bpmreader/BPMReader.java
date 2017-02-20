@@ -25,7 +25,7 @@ import be.hogent.tarsos.dsp.util.FFT;*/
 public class BPMReader {
 
     private final static int MIN_TEMPO_BPM = 60;
-    private final static int MAX_TEMPO_BPM = 220;
+    private final static int MAX_TEMPO_BPM = 250;
     private final static int MAX_NOTES_KEY = 15;
     //Para el tempo total.
     private static double StartTime_ms = 0;
